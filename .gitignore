@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Model files (too large for GitHub)
+finetuned_model/
+finetuned_model.zip
+
+# Generated/runtime files
+outputs/
+uploads/
+
+# Datasets (optional - uncomment if you want to include them)
+# labeled_subtitles.csv
+# test_subtitles.csv
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+venv/
+.env

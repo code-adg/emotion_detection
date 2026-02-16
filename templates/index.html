@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Context-Aware Emotion Detection from Subtitle Text Using NLP — Final Year Project" />
+  <title>EmotiSub — Subtitle Emotion Detector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+  <!-- Custom Cursor -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- ─── Intro Splash ──────────────────────────────────────────────── -->
+  <div class="splash-screen" id="splashScreen">
+    <div class="splash-content">
+      <div class="splash-icon">
+        <i class="bi bi-film"></i>
+      </div>
+      <h1 class="splash-title" id="splashTitle">EmotiSub</h1>
+      <p class="splash-tagline" id="splashTagline">Context-Aware Emotion Detection</p>
+    </div>
+  </div>
+
+  <!-- ─── Main App (hidden until splash finishes) ────────────────────── -->
+  <div class="app-wrapper" id="appWrapper">
+    <!-- ─── Navbar ────────────────────────────────────────────────────── -->
+    <nav class="navbar-custom">
+      <div class="container">
+        <div class="nav-inner">
+          <div class="nav-brand">
+            <i class="bi bi-film brand-icon"></i>
+            <div>
+              <span class="brand-name">EmotiSub</span>
+              <span class="brand-sub">Subtitle Emotion Detector</span>
+            </div>
+          </div>
+          <div class="nav-badges">
+            <span class="nav-badge"><i class="bi bi-cpu"></i> Local Inference</span>
+            <span class="nav-badge nav-badge--model"><i class="bi bi-lightning-charge-fill"></i> Fine-Tuned Model</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ─── Hero Section ──────────────────────────────────────────────── -->
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-content lazy-section" data-lazy>
+          <h2 class="hero-title">Analyze emotions in your subtitles</h2>
+          <p class="hero-desc">Upload an SRT file and our fine-tuned NLP model will detect emotions for every line —
+            anger, joy, sadness, surprise, and more.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Upload Section ────────────────────────────────────────────── -->
+    <section class="upload-section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="upload-card lazy-section" data-lazy>
+              <div class="upload-card-header">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <h3>Upload Subtitle File</h3>
+              </div>
+
+              <div class="upload-dropzone" id="uploadZone">
+                <input type="file" id="srtInput" accept=".srt" hidden />
+                <div class="dropzone-content">
+                  <div class="dropzone-icon">
+                    <i class="bi bi-file-earmark-text"></i>
+                  </div>
+                  <p class="dropzone-label">Drag & drop your <strong>.srt</strong> file here</p>
+                  <p class="dropzone-hint">or click to browse</p>
+                </div>
+                <p class="file-name" id="fileName"></p>
+              </div>
+
+              <button class="btn-analyze" id="analyzeBtn" disabled>
+                <span class="btn-text"><i class="bi bi-activity"></i> Analyze Emotions</span>
+                <span class="btn-loader" id="btnLoader"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Pipeline Steps (shown during processing) ──────────────────── -->
+    <section class="pipeline-section" id="pipelineSection" style="display:none;">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="pipeline-card">
+              <h4 class="pipeline-title"><i class="bi bi-gear-wide-connected"></i> Processing Pipeline</h4>
+              <div class="pipeline-steps">
+                <div class="pipeline-step" id="step-parse">
+                  <div class="step-indicator"><i class="bi bi-circle"></i></div>
+                  <div class="step-info">
+                    <span class="step-name">Parsing SRT Input</span>
+                    <span class="step-desc">Reading subtitle timestamps & text</span>
+                  </div>
+                </div>
+                <div class="pipeline-step" id="step-tokenize">
+                  <div class="step-indicator"><i class="bi bi-circle"></i></div>
+                  <div class="step-info">
+                    <span class="step-name">Tokenizing Text</span>
+                    <span class="step-desc">Converting text to model input tokens</span>
+                  </div>
+                </div>
+                <div class="pipeline-step" id="step-predict">
+                  <div class="step-indicator"><i class="bi bi-circle"></i></div>
+                  <div class="step-info">
+                    <span class="step-name">Predicting Emotions</span>
+                    <span class="step-desc">Running inference through fine-tuned RoBERTa</span>
+                  </div>
+                </div>
+                <div class="pipeline-step" id="step-threshold">
+                  <div class="step-indicator"><i class="bi bi-circle"></i></div>
+                  <div class="step-info">
+                    <span class="step-name">Applying Confidence Threshold</span>
+                    <span class="step-desc">Filtering low-confidence predictions</span>
+                  </div>
+                </div>
+                <div class="pipeline-step" id="step-aggregate">
+                  <div class="step-indicator"><i class="bi bi-circle"></i></div>
+                  <div class="step-info">
+                    <span class="step-name">Context-Aware Aggregation</span>
+                    <span class="step-desc">Majority voting across sliding windows</span>
+                  </div>
+                </div>
+                <div class="pipeline-step" id="step-output">
+                  <div class="step-indicator"><i class="bi bi-circle"></i></div>
+                  <div class="step-info">
+                    <span class="step-name">Generating Color-Coded SRT</span>
+                    <span class="step-desc">Creating downloadable output file</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Results Section ───────────────────────────────────────────── -->
+    <section class="results-section" id="resultsWrapper" style="display:none;">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <div class="results-card lazy-section" data-lazy>
+              <div class="results-header">
+                <div>
+                  <h3><i class="bi bi-bar-chart-line"></i> Analysis Results</h3>
+                  <span class="results-count" id="resultsCount"></span>
+                </div>
+                <a class="btn-download" id="downloadBtn" style="display:none;">
+                  <i class="bi bi-download"></i> Download Color-Coded SRT
+                </a>
+              </div>
+
+              <!-- Emotion Summary Cards -->
+              <div class="emotion-summary" id="emotionSummary"></div>
+
+              <!-- Results Table -->
+              <div class="table-container">
+                <table class="results-table" id="resultsTable">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Timestamp</th>
+                      <th>Subtitle Text</th>
+                      <th>Emotion</th>
+                      <th>Confidence</th>
+                    </tr>
+                  </thead>
+                  <tbody id="resultsBody"></tbody>
+                </table>
+              </div>
+
+              <p class="vlc-note">
+                <i class="bi bi-info-circle"></i>
+                The downloaded .srt uses <code>&lt;font color&gt;</code> tags compatible with <strong>VLC Media
+                  Player</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Features Section ──────────────────────────────────────────── -->
+    <section class="features-section">
+      <div class="container">
+        <h3 class="section-title lazy-section" data-lazy>How It Works</h3>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="feature-card lazy-section" data-lazy>
+              <div class="feature-icon"><i class="bi bi-file-earmark-text"></i></div>
+              <h4>Upload SRT</h4>
+              <p>Upload any standard subtitle file in SRT format</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="feature-card lazy-section" data-lazy>
+              <div class="feature-icon"><i class="bi bi-cpu"></i></div>
+              <h4>NLP Analysis</h4>
+              <p>Fine-tuned RoBERTa model classifies 7 emotion categories</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="feature-card lazy-section" data-lazy>
+              <div class="feature-icon"><i class="bi bi-palette"></i></div>
+              <h4>Color-Coded Output</h4>
+              <p>Download color-tagged subtitles for VLC playback</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Disclaimer ────────────────────────────────────────────────── -->
+    <div class="container">
+      <div class="disclaimer lazy-section" data-lazy>
+        <i class="bi bi-exclamation-triangle"></i>
+        This tool provides approximate emotion labels for assistive/research purposes.
+        It does not claim clinical accuracy or medical diagnosis capability.
+      </div>
+    </div>
+
+    <!-- ─── Footer ────────────────────────────────────────────────────── -->
+    <footer class="site-footer">
+      <div class="container">
+        <p>Final Year Project · Context-Aware Emotion Detection from Subtitle Text Using NLP</p>
+        <p class="footer-sub">Built with Flask · HuggingFace Transformers · Fine-Tuned RoBERTa</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+
+</html>
