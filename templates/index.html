@@ -21,6 +21,13 @@
   <div class="cursor-dot" id="cursorDot"></div>
   <div class="cursor-ring" id="cursorRing"></div>
 
+  <!-- Animated Gradient Background -->
+  <div class="gradient-bg" aria-hidden="true">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+  </div>
+
   <!-- ─── Intro Splash ──────────────────────────────────────────────── -->
   <div class="splash-screen" id="splashScreen">
     <div class="splash-content">
@@ -29,6 +36,9 @@
       </div>
       <h1 class="splash-title" id="splashTitle">EmotiSub</h1>
       <p class="splash-tagline" id="splashTagline">Context-Aware Emotion Detection</p>
+      <div class="splash-progress">
+        <div class="splash-progress-fill"></div>
+      </div>
     </div>
   </div>
 
@@ -53,16 +63,168 @@
       </div>
     </nav>
 
-    <!-- ─── Hero Section ──────────────────────────────────────────────── -->
-    <section class="hero-section">
+    <!-- ─── Full-Screen Hero Section ─────────────────────────────────── -->
+    <section class="hero-section" id="heroSection">
+      <div class="hero-particles" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
       <div class="container">
-        <div class="hero-content lazy-section" data-lazy>
-          <h2 class="hero-title">Analyze emotions in your subtitles</h2>
-          <p class="hero-desc">Upload an SRT file and our fine-tuned NLP model will detect emotions for every line —
-            anger, joy, sadness, surprise, and more.</p>
+        <div class="hero-content hero-centered">
+          <h1 class="hero-title">Context-Aware Emotion<br>Detection from <span class="hero-accent">Subtitle Text</span></h1>
+          <p class="hero-desc">
+            An NLP-powered system that analyzes subtitle files to detect emotions in dialogue —
+            using a fine-tuned RoBERTa model with context-aware sliding window aggregation
+            for accurate, real-time emotion classification.
+          </p>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <i class="bi bi-robot"></i>
+              <div>
+                <span class="hero-stat-value">RoBERTa</span>
+                <span class="hero-stat-label">Fine-Tuned Model</span>
+              </div>
+            </div>
+            <div class="hero-stat">
+              <i class="bi bi-emoji-smile"></i>
+              <div>
+                <span class="hero-stat-value">7</span>
+                <span class="hero-stat-label">Emotion Classes</span>
+              </div>
+            </div>
+            <div class="hero-stat">
+              <i class="bi bi-diagram-3"></i>
+              <div>
+                <span class="hero-stat-value">Context</span>
+                <span class="hero-stat-label">Aware Pipeline</span>
+              </div>
+            </div>
+            <div class="hero-stat">
+              <i class="bi bi-database"></i>
+              <div>
+                <span class="hero-stat-value">MELD</span>
+                <span class="hero-stat-label">Training Dataset</span>
+              </div>
+            </div>
+          </div>
+          <a href="#uploadAnchor" class="hero-cta" id="heroCta">
+            <span>Try It Now</span>
+            <i class="bi bi-arrow-down"></i>
+          </a>
+          <div class="scroll-indicator" id="scrollIndicator">
+            <div class="scroll-mouse">
+              <div class="scroll-wheel"></div>
+            </div>
+            <span>Scroll to explore</span>
+          </div>
         </div>
       </div>
     </section>
+
+    <!-- Anchor for scroll target -->
+    <div id="contentStart"></div>
+
+    <!-- ─── Scroll-Synced Animation Section ──────────────────────────── -->
+    <div class="scroll-journey" id="scrollJourney">
+      <div class="scroll-journey-sticky">
+
+        <!-- Phase 1: Subtitle Preview (project-themed) -->
+        <div class="sj-phase sj-research" id="sjResearch">
+          <div class="sj-research-card sj-subtitle-card">
+            <div class="sj-doc-icon">
+              <i class="bi bi-film"></i>
+            </div>
+            <div class="sj-subtitle-lines">
+              <div class="sj-sub-line">
+                <span class="sj-sub-time">00:01:24</span>
+                <span class="sj-sub-text">"I can't believe you did that!"</span>
+                <span class="sj-sub-emo">😡</span>
+              </div>
+              <div class="sj-sub-line">
+                <span class="sj-sub-time">00:01:27</span>
+                <span class="sj-sub-text">"I'm sorry... I didn't mean to."</span>
+                <span class="sj-sub-emo">😢</span>
+              </div>
+              <div class="sj-sub-line">
+                <span class="sj-sub-time">00:01:31</span>
+                <span class="sj-sub-text">"Wait, is that what I think it is?"</span>
+                <span class="sj-sub-emo">😲</span>
+              </div>
+              <div class="sj-sub-line">
+                <span class="sj-sub-time">00:01:35</span>
+                <span class="sj-sub-text">"Yes! We actually did it!"</span>
+                <span class="sj-sub-emo">😊</span>
+              </div>
+            </div>
+          </div>
+          <h3 class="sj-research-title">Your Subtitles</h3>
+          <p class="sj-research-sub">Every line carries an emotion. Let's find it.</p>
+        </div>
+
+        <!-- Phase 2: Step Cards with Progress Dot -->
+        <div class="sj-phase sj-steps" id="sjSteps">
+          <p class="sj-steps-intro">But here's how <strong>EmotiSub</strong> makes it simple for you:</p>
+
+          <div class="sj-cards-row">
+            <!-- Progress Track -->
+            <div class="sj-progress-track">
+              <div class="sj-progress-line"></div>
+              <div class="sj-progress-fill" id="sjProgressFill"></div>
+              <div class="sj-progress-dot" id="sjDot">
+                <span class="sj-dot-label">Text File</span>
+              </div>
+            </div>
+
+            <div class="sj-card" data-step="0">
+              <div class="sj-card-icon"><i class="bi bi-upload"></i></div>
+              <h4>Upload</h4>
+              <p>Drop in any subtitle file from a movie, show, or video — that's all you need to do.</p>
+            </div>
+
+            <div class="sj-card" data-step="1">
+              <div class="sj-card-icon"><i class="bi bi-chat-left-text"></i></div>
+              <h4>Read</h4>
+              <p>Every single line of dialogue is carefully read and broken down, word by word.</p>
+            </div>
+
+            <div class="sj-card" data-step="2">
+              <div class="sj-card-icon"><i class="bi bi-heart-pulse"></i></div>
+              <h4>Feel</h4>
+              <p>Our AI senses emotions in each line — is it happy? Sad? Angry? Surprised?</p>
+            </div>
+
+            <div class="sj-card" data-step="3">
+              <div class="sj-card-icon"><i class="bi bi-people"></i></div>
+              <h4>Context</h4>
+              <p>We look at surrounding lines too — because one line alone can be misleading.</p>
+            </div>
+
+            <div class="sj-card" data-step="4">
+              <div class="sj-card-icon"><i class="bi bi-palette2"></i></div>
+              <h4>Color</h4>
+              <p>Each line gets painted with a color matching its emotion — ready for playback.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 3: Brain Card -->
+        <div class="sj-phase sj-brain" id="sjBrain">
+          <div class="sj-brain-card">
+            <div class="sj-brain-icon">
+              <i class="bi bi-cpu-fill"></i>
+              <div class="sj-brain-pulse"></div>
+            </div>
+            <span class="sj-brain-badge">System Ready</span>
+          </div>
+          <h3 class="sj-brain-title">EmotiSub is Ready</h3>
+          <p class="sj-brain-sub">Your subtitles are about to come alive with emotion.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Anchor for Analyze Now button -->
+    <div id="uploadAnchor"></div>
 
     <!-- ─── Upload Section ────────────────────────────────────────────── -->
     <section class="upload-section">
@@ -75,7 +237,8 @@
                 <h3>Upload Subtitle File</h3>
               </div>
 
-              <div class="upload-dropzone" id="uploadZone">
+              <div class="upload-dropzone" id="uploadZone" tabindex="0" role="button"
+                aria-label="Upload an SRT subtitle file. Drag and drop or click to browse.">
                 <input type="file" id="srtInput" accept=".srt" hidden />
                 <div class="dropzone-content">
                   <div class="dropzone-icon">
@@ -87,10 +250,15 @@
                 <p class="file-name" id="fileName"></p>
               </div>
 
-              <button class="btn-analyze" id="analyzeBtn" disabled>
-                <span class="btn-text"><i class="bi bi-activity"></i> Analyze Emotions</span>
-                <span class="btn-loader" id="btnLoader"></span>
-              </button>
+              <!-- Inline validation message -->
+              <p class="dropzone-error" id="dropzoneError"></p>
+
+              <div class="btn-row">
+                <button class="btn-analyze" id="analyzeBtn" disabled>
+                  <span class="btn-text"><i class="bi bi-activity"></i> Analyze Emotions</span>
+                  <span class="btn-loader" id="btnLoader"></span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -165,13 +333,39 @@
                   <h3><i class="bi bi-bar-chart-line"></i> Analysis Results</h3>
                   <span class="results-count" id="resultsCount"></span>
                 </div>
-                <a class="btn-download" id="downloadBtn" style="display:none;">
-                  <i class="bi bi-download"></i> Download Color-Coded SRT
-                </a>
+                <div class="results-actions">
+                  <a class="btn-download" id="downloadBtn" style="display:none;">
+                    <i class="bi bi-download"></i> Without Emoticons
+                  </a>
+                  <a class="btn-download btn-download--emoji" id="downloadEmojiBtn" style="display:none;">
+                    <i class="bi bi-emoji-smile"></i> With Emoticons
+                  </a>
+                  <button class="btn-reset" id="resetBtn" style="display:none;">
+                    <i class="bi bi-arrow-counterclockwise"></i> New Analysis
+                  </button>
+                </div>
+              </div>
+
+              <!-- Donut Chart + Emotion Summary Cards -->
+              <div class="chart-section" id="chartSection">
+                <div class="chart-container">
+                  <canvas id="donutChart" width="180" height="180"></canvas>
+                  <div class="chart-center-label">
+                    <span class="total-num" id="chartTotal">0</span>
+                    <span class="total-label">Lines</span>
+                  </div>
+                </div>
+                <div class="chart-legend" id="chartLegend"></div>
               </div>
 
               <!-- Emotion Summary Cards -->
               <div class="emotion-summary" id="emotionSummary"></div>
+
+              <!-- Filter Bar -->
+              <div class="filter-bar" id="filterBar">
+                <span class="filter-bar-label"><i class="bi bi-funnel"></i> Filter:</span>
+                <button class="filter-chip active" data-emotion="all">All</button>
+              </div>
 
               <!-- Results Table -->
               <div class="table-container">

@@ -1,4 +1,4 @@
-# 🎬 Context-Aware Emotion Detection from Subtitle Text
+# 🎬 EmotiSub — Context-Aware Emotion Detection from Subtitle Text
 
 A web application that detects emotions in subtitle (`.srt`) files using a fine-tuned NLP transformer model and generates **color-coded subtitles** for VLC Media Player.
 
@@ -12,19 +12,22 @@ A web application that detects emotions in subtitle (`.srt`) files using a fine-
 - **Fine-Tuned Model** — RoBERTa model fine-tuned on the MELD (Friends TV show) dataset for 7 emotions
 - **Context-Aware** — Majority-vote aggregation across neighbouring subtitles stabilizes predictions
 - **Color-Coded Output** — Download emotion-colored `.srt` files playable in VLC
+- **Emoji Support** — Choose between downloads with or without emotion emoticons (😡😢😊😲…)
+- **Interactive UI** — Scroll-synced animation, donut chart, emotion summary cards, and live pipeline visualization
+- **Smart Results** — Full table for small files (≤30 lines), infographics-only view for larger files
 - **CPU-Only** — Runs on any machine without a GPU
 
 ## 🎭 Supported Emotions
 
-| Emotion | Color |
-|---------|-------|
-| Joy | 🟢 Green |
-| Sadness | 🔵 Blue |
-| Anger | 🔴 Red |
-| Fear | 🟣 Purple |
-| Surprise | 🟡 Yellow |
-| Disgust | 🟤 Brown |
-| Neutral | ⚪ White |
+| Emotion | Color | Emoji |
+|---------|-------|-------|
+| Anger | 🔴 Red (`#ef4444`) | 😡 |
+| Disgust | 🟤 Brown (`#a3735c`) | 🤢 |
+| Fear | 🟣 Purple (`#a855f7`) | 😨 |
+| Joy | 🟡 Gold (`#eab308`) | 😊 |
+| Neutral | ⚪ Grey (`#CCCCCC`) | 😐 |
+| Sadness | 🔵 Blue (`#3b82f6`) | 😢 |
+| Surprise | 🟠 Orange (`#f97316`) | 😲 |
 
 ---
 
@@ -94,11 +97,31 @@ Open **http://localhost:5000** in your browser.
 ├── templates/
 │   └── index.html          # Main UI page
 ├── static/
-│   ├── style.css           # Dark theme with glassmorphism
-│   └── script.js           # Upload logic, animations & results
+│   ├── style.css           # Dark theme with emerald accents
+│   └── script.js           # Upload, animations, scroll engine & results
 ├── uploads/                # (auto-created) temporary uploads
 └── outputs/                # (auto-created) color-coded SRT outputs
 ```
+
+---
+
+## 🖥️ UI Overview
+
+### Hero Section
+Full-screen landing with gradient title, technology stat badges (RoBERTa, 7 Emotions, Context Aware, MELD), animated particles, and a "Try It Now" CTA that jumps directly to the analysis section.
+
+### Scroll-Synced Animation
+A scroll-driven animation explains the process in non-technical language:
+1. **Subtitle Preview** — SRT-styled card with dialogue lines and emoji emotions
+2. **Step Cards** — Upload → Read → Feel → Context → Color — with a "Text File" progress dot moving along a track
+3. **Brain Card** — "EmotiSub is Ready" with pulsing animation
+
+### Analysis Section
+- Drag-and-drop upload with validation
+- Real-time pipeline visualization (Parse → Tokenize → Predict → Aggregate → Output)
+- Donut chart + legend + emotion summary cards
+- Full results table with filter chips (≤30 lines) or infographics-only view (>30 lines)
+- Two download options: **Without Emoticons** or **With Emoticons**
 
 ---
 
@@ -112,7 +135,7 @@ Upload .srt → Parse Subtitles → Classify Each Line → Apply Threshold → M
 2. **Classify** — Run each subtitle line through the fine-tuned RoBERTa model
 3. **Threshold** — Replace low-confidence predictions (<0.25) with "neutral"
 4. **Aggregate** — Majority-vote across a sliding window (±2 neighbours) for context-aware stabilization
-5. **Output** — Generate a color-coded `.srt` file with `<font color>` tags compatible with VLC
+5. **Output** — Generate two color-coded `.srt` files (with and without emojis) using VLC-compatible `<font color>` tags
 
 ---
 
@@ -125,7 +148,7 @@ Upload .srt → Parse Subtitles → Classify Each Line → Apply Threshold → M
 | ML Framework | PyTorch (CPU-only) |
 | Transformers | HuggingFace Transformers |
 | Frontend | HTML5 + CSS3 + JavaScript |
-| UI Design | Dark theme, glassmorphism, Bootstrap 5 |
+| UI Design | Dark theme, emerald accents, Bootstrap 5 |
 | Subtitle Format | SRT with VLC `<font color>` tags |
 
 ---
@@ -151,8 +174,22 @@ python finetune.py           # Fine-tune the model (GPU recommended)
 | Route | Method | Description |
 |-------|--------|-------------|
 | `/` | GET | Serve the main web UI |
-| `/upload` | POST | Upload `.srt` file, returns emotion analysis as JSON |
-| `/download/<filename>` | GET | Download the color-coded `.srt` file |
+| `/upload` | POST | Upload `.srt` file, returns emotion analysis JSON (includes both download links) |
+| `/download/<filename>` | GET | Download a color-coded `.srt` file |
+
+### Upload Response JSON
+
+```json
+{
+  "success": true,
+  "count": 28,
+  "results": [
+    { "index": 1, "start": "00:00:01,000", "end": "00:00:03,500", "text": "Hello!", "emotion": "joy", "confidence": 0.9234 }
+  ],
+  "download": "/download/colored_abc123_file.srt",
+  "download_emoji": "/download/colored_emoji_abc123_file.srt"
+}
+```
 
 ---
 

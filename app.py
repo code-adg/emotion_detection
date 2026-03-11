@@ -80,10 +80,15 @@ def upload():
         #         final label is stabilized by its neighbours' predictions
         final_predictions = aggregate_votes(thresholded, window=2)
 
-        # Step 6: Generate color-coded SRT
+        # Step 6: Generate color-coded SRT (without emoji)
         output_name = f"colored_{safe_name}"
         output_path = os.path.join(OUTPUT_FOLDER, output_name)
-        generate_colored_srt(subtitles, final_predictions, output_path)
+        generate_colored_srt(subtitles, final_predictions, output_path, with_emoji=False)
+
+        # Step 7: Generate color-coded SRT (with emoji)
+        output_name_emoji = f"colored_emoji_{safe_name}"
+        output_path_emoji = os.path.join(OUTPUT_FOLDER, output_name_emoji)
+        generate_colored_srt(subtitles, final_predictions, output_path_emoji, with_emoji=True)
 
         # ── Build response ───────────────────────────────────────────────
         results = []
@@ -102,6 +107,7 @@ def upload():
             "count": len(results),
             "results": results,
             "download": f"/download/{output_name}",
+            "download_emoji": f"/download/{output_name_emoji}",
         })
 
     except Exception as e:

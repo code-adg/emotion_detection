@@ -18,6 +18,17 @@ EMOTION_COLORS: Dict[str, str] = {
     "surprise": "#f97316",  # Orange
 }
 
+# ── Emotion → Emoji mapping ───────────────────────────────────────────────────
+EMOTION_EMOJI: Dict[str, str] = {
+    "anger":    "😡",
+    "disgust":  "🤢",
+    "fear":     "😨",
+    "joy":      "😊",
+    "neutral":  "😐",
+    "sadness":  "😢",
+    "surprise": "😲",
+}
+
 
 # ── SRT Parsing ───────────────────────────────────────────────────────────────
 
@@ -113,6 +124,7 @@ def generate_colored_srt(
     subtitles: List[Dict],
     emotions: List[Tuple[str, float]],
     output_path: str,
+    with_emoji: bool = False,
 ) -> str:
     """
     Write a new .srt file with VLC-compatible <font color> tags.
@@ -125,6 +137,8 @@ def generate_colored_srt(
         One emotion prediction per subtitle.
     output_path : str
         Destination path for the colored .srt file.
+    with_emoji : bool
+        If True, prepend an emoji to each subtitle line.
 
     Returns
     -------
@@ -135,9 +149,11 @@ def generate_colored_srt(
 
     for sub, (emotion, confidence) in zip(subtitles, emotions):
         color = EMOTION_COLORS.get(emotion, "#CCCCCC")
+        emoji = EMOTION_EMOJI.get(emotion, "") if with_emoji else ""
+        text = f"{emoji} {sub['text']}" if emoji else sub["text"]
         lines.append(str(sub["index"]))
         lines.append(f"{sub['start']} --> {sub['end']}")
-        lines.append(f'<font color="{color}">{sub["text"]}</font>')
+        lines.append(f'<font color="{color}">{text}</font>')
         lines.append("")  # blank line separator
 
     with open(output_path, "w", encoding="utf-8") as f:

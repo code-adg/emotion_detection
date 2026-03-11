@@ -7,7 +7,8 @@
 ## 🗓️ Development Timeline
 
 **Start Date:** February 10, 2026  
-**Status:** In Progress (UI Overhaul & Integration)
+**Last Updated:** March 12, 2026  
+**Status:** In Progress (Hero Section, Scroll Animation & Emoji Export)
 
 ---
 
@@ -278,3 +279,68 @@ model = AutoModelForSequenceClassification.from_pretrained(
 5. **Transfer learning** — fine-tuning a pretrained model rather than training from scratch
 6. **VLC-compatible coloring** — uses `<font color>` tags supported by VLC Media Player
 7. **Ethical disclaimers** — UI clearly states this is not a medical/clinical tool
+
+---
+
+## Phase 5: Hero Section & Scroll-Synced Animation
+**Date:** March 11, 2026
+
+### Step 16 — Full-Screen Hero Section
+**Objective:** Replace the simple header with a cinematic full-viewport hero.
+
+**Changes Made:**
+- Full-height (`100vh`) hero with animated floating particles
+- Center-aligned title with gradient accent text ("Subtitle Text")
+- Technology stat badges: RoBERTa, 7 Emotion Classes, Context Aware Pipeline, MELD
+- "Try It Now" CTA button — instant jumps to the upload/analysis section (bypasses scroll animation)
+- "Scroll to explore" indicator with animated mouse icon, aligned within hero content
+- Staggered fade-in animations on all hero elements
+
+### Step 17 — Scroll-Synced Animation Section
+**Objective:** Create a scroll-driven animation between hero and upload sections that visually explains how EmotiSub works, using simple non-technical language.
+
+**Implementation:**
+- **Container:** `500vh` tall `.scroll-journey` div with `position: sticky` inner viewport
+- **Phase 1 — Subtitle Preview Card:** SRT-styled card showing dialogue lines with timestamps and emoji emotions (😡😢😲😊) — fades in/out as user scrolls
+- **Phase 2 — Step Cards (5):** Upload → Read → Feel → Context → Color — each card highlights as a "Text File" progress dot moves across a track, synchronized with scroll speed
+- **Phase 3 — Brain Card:** "EmotiSub is Ready" with pulsing CPU icon — fades in at the end
+
+**Technical Details:**
+- `requestAnimationFrame` debounced scroll handler for 60fps performance
+- Phase timeline mapped to scroll progress (0–1): research (0–0.25), steps (0.22–0.80), brain (0.78–1.0)
+- Responsive design: cards stack vertically on mobile, progress track hidden below 768px
+- ~130 lines of JS animation engine + ~250 lines of CSS
+
+### Step 18 — Hero Refinements
+**Changes Made:**
+- Removed "Final Year Project" badge from hero
+- Center-aligned all hero content (title, description, stats, CTA)
+- Removed "Analyze Now" navbar button; "Try It Now" CTA now jumps directly to upload section using `scrollIntoView({ behavior: "auto" })` to bypass the scroll animation
+
+---
+
+## Phase 6: Emoji SRT Export & Results Optimization
+**Date:** March 11–12, 2026
+
+### Step 19 — Emoji Toggle for SRT Downloads
+**Objective:** Allow users to download color-coded SRT files with or without emotion emoticons.
+
+**Backend Changes:**
+- **`srt_utils.py`:** Added `EMOTION_EMOJI` mapping (anger→😡, disgust→🤢, fear→😨, joy→😊, neutral→😐, sadness→😢, surprise→😲) and `with_emoji` parameter to `generate_colored_srt()`
+- **`app.py`:** Now generates **two** SRT files per analysis — one without emojis, one with. Both download links returned in JSON response (`download` and `download_emoji`)
+
+**Frontend Changes:**
+- Two download buttons in results section:
+  - "Without Emoticons" (solid green) → plain color-coded SRT
+  - "With Emoticons" (green outline with emoji icon) → color-coded SRT with emoji prefixes (e.g. `😡 I can't believe you did that!`)
+- Both buttons hidden/shown dynamically based on response data
+
+### Step 20 — Large File Results Optimization
+**Objective:** When subtitle count exceeds 30 lines, hide the full results table and show only infographics.
+
+**Change in `script.js` `renderResults()`:**
+- **≤ 30 lines:** Full display — donut chart + legend + emotion summary cards + filter bar + results table + VLC note
+- **> 30 lines:** Infographics only — donut chart + legend + emotion summary cards + download buttons (filter bar, table, and VLC note hidden)
+
+This prevents the UI from becoming overwhelming with hundreds of table rows for long subtitle files.
+
