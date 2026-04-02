@@ -1,9 +1,3 @@
-"""
-app.py
-───────
-Flask application for Context-Aware Emotion Detection from Subtitle Text.
-"""
-
 import os
 import uuid
 
@@ -11,8 +5,6 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 
 from srt_utils import parse_srt, build_context_windows, generate_colored_srt
 from emotion_model import predict_emotions, apply_threshold, aggregate_votes
-
-# ── App Setup ─────────────────────────────────────────────────────────────────
 
 app = Flask(__name__)
 
@@ -25,24 +17,16 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["OUTPUT_FOLDER"] = OUTPUT_FOLDER
-app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB max upload
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 
-
-# ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route("/")
 def index():
-    """Serve the main UI."""
     return render_template("index.html")
 
 
 @app.route("/upload", methods=["POST"])
 def upload():
-    """
-    Accept an .srt file, run the full emotion-detection pipeline,
-    and return results as JSON.
-    """
-    # ── Validate upload ───────────────────────────────────────────────────
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded."}), 400
 
@@ -53,44 +37,32 @@ def upload():
     if not file.filename.lower().endswith(".srt"):
         return jsonify({"error": "Only .srt files are accepted."}), 400
 
-    # ── Save uploaded file ────────────────────────────────────────────────
     unique_id = uuid.uuid4().hex[:8]
     safe_name = f"{unique_id}_{file.filename}"
     upload_path = os.path.join(UPLOAD_FOLDER, safe_name)
     file.save(upload_path)
 
     try:
-        # ── Pipeline ─────────────────────────────────────────────────────
-        # Step 1: Parse SRT
         subtitles = parse_srt(upload_path)
         if not subtitles:
             return jsonify({"error": "Could not parse any subtitles from the file."}), 400
 
-        # Step 2: Extract individual subtitle texts for classification
         individual_texts = [sub["text"] for sub in subtitles]
 
-        # Step 3: Predict emotions on individual lines
         raw_predictions = predict_emotions(individual_texts)
 
-        # Step 4: Apply confidence threshold (lower for 28-class model)
-        thresholded = apply_threshold(raw_predictions, threshold=0.25)
+        thresholded = apply_threshold(raw_predictions, threshold=0.15)
 
-        # Step 5: Context-aware aggregation via majority voting
-        #         This is where context awareness happens — each subtitle's
-        #         final label is stabilized by its neighbours' predictions
         final_predictions = aggregate_votes(thresholded, window=2)
 
-        # Step 6: Generate color-coded SRT (without emoji)
         output_name = f"colored_{safe_name}"
         output_path = os.path.join(OUTPUT_FOLDER, output_name)
         generate_colored_srt(subtitles, final_predictions, output_path, with_emoji=False)
 
-        # Step 7: Generate color-coded SRT (with emoji)
         output_name_emoji = f"colored_emoji_{safe_name}"
         output_path_emoji = os.path.join(OUTPUT_FOLDER, output_name_emoji)
         generate_colored_srt(subtitles, final_predictions, output_path_emoji, with_emoji=True)
 
-        # ── Build response ───────────────────────────────────────────────
         results = []
         for sub, (emotion, confidence) in zip(subtitles, final_predictions):
             results.append({
@@ -116,15 +88,12 @@ def upload():
 
 @app.route("/download/<filename>")
 def download(filename):
-    """Serve a generated color-coded .srt file for download."""
     return send_from_directory(
         app.config["OUTPUT_FOLDER"],
         filename,
         as_attachment=True,
     )
 
-
-# ── Entry Point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     print("\n  🚀  Starting Emotion Detection Server …")

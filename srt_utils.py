@@ -1,24 +1,16 @@
-"""
-srt_utils.py
-─────────────
-SRT subtitle parsing, context-window generation, and color-coded SRT output.
-"""
-
 import re
 from typing import List, Dict, Tuple
 
-# ── Emotion → VLC <font color> mapping (MELD — 7 labels) ──────────────────────
 EMOTION_COLORS: Dict[str, str] = {
-    "anger":    "#ef4444",  # Red
-    "disgust":  "#a3735c",  # Brown
-    "fear":     "#a855f7",  # Purple
-    "joy":      "#eab308",  # Yellow/Gold
-    "neutral":  "#CCCCCC",  # Grey (lightened for subtitle readability)
-    "sadness":  "#3b82f6",  # Blue
-    "surprise": "#f97316",  # Orange
+    "anger":    "#ef4444",
+    "disgust":  "#a3735c",
+    "fear":     "#a855f7",
+    "joy":      "#eab308",
+    "neutral":  "#CCCCCC",
+    "sadness":  "#3b82f6",
+    "surprise": "#f97316",
 }
 
-# ── Emotion → Emoji mapping ───────────────────────────────────────────────────
 EMOTION_EMOJI: Dict[str, str] = {
     "anger":    "😡",
     "disgust":  "🤢",
@@ -30,21 +22,10 @@ EMOTION_EMOJI: Dict[str, str] = {
 }
 
 
-# ── SRT Parsing ───────────────────────────────────────────────────────────────
-
 def parse_srt(filepath: str) -> List[Dict]:
-    """
-    Parse an .srt file into a list of subtitle entries.
-
-    Returns
-    -------
-    list of dict
-        Each dict has keys: index (int), start (str), end (str), text (str).
-    """
     with open(filepath, "r", encoding="utf-8-sig") as f:
         content = f.read()
 
-    # Split on blank lines (one or more) to get blocks
     blocks = re.split(r"\n\s*\n", content.strip())
     subtitles: List[Dict] = []
 
@@ -58,7 +39,6 @@ def parse_srt(filepath: str) -> List[Dict]:
         except ValueError:
             continue
 
-        # Timestamp line: 00:01:23,456 --> 00:01:25,789
         timestamp_match = re.match(
             r"(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})",
             lines[1].strip(),
@@ -70,7 +50,6 @@ def parse_srt(filepath: str) -> List[Dict]:
         end_time = timestamp_match.group(2)
         text = " ".join(line.strip() for line in lines[2:])
 
-        # Strip any existing HTML-style tags from the raw text
         text = re.sub(r"<[^>]+>", "", text)
 
         subtitles.append({
@@ -83,29 +62,9 @@ def parse_srt(filepath: str) -> List[Dict]:
     return subtitles
 
 
-# ── Context-Window Builder ────────────────────────────────────────────────────
-
 def build_context_windows(
     subtitles: List[Dict], window: int = 2
 ) -> List[str]:
-    """
-    Create a sliding context window for each subtitle line.
-
-    For each subtitle at position *i*, concatenate the text of subtitles
-    from (i - window) to (i + window) inclusive, separated by ' [SEP] '.
-
-    Parameters
-    ----------
-    subtitles : list of dict
-        Output of ``parse_srt``.
-    window : int
-        Number of lines before and after the current line to include.
-
-    Returns
-    -------
-    list of str
-        One context string per subtitle, same length as *subtitles*.
-    """
     contexts: List[str] = []
     n = len(subtitles)
 
@@ -118,33 +77,12 @@ def build_context_windows(
     return contexts
 
 
-# ── Color-Coded SRT Generation ────────────────────────────────────────────────
-
 def generate_colored_srt(
     subtitles: List[Dict],
     emotions: List[Tuple[str, float]],
     output_path: str,
     with_emoji: bool = False,
 ) -> str:
-    """
-    Write a new .srt file with VLC-compatible <font color> tags.
-
-    Parameters
-    ----------
-    subtitles : list of dict
-        Original parsed subtitles.
-    emotions : list of (label, confidence)
-        One emotion prediction per subtitle.
-    output_path : str
-        Destination path for the colored .srt file.
-    with_emoji : bool
-        If True, prepend an emoji to each subtitle line.
-
-    Returns
-    -------
-    str
-        The *output_path* written to.
-    """
     lines: List[str] = []
 
     for sub, (emotion, confidence) in zip(subtitles, emotions):
@@ -154,7 +92,7 @@ def generate_colored_srt(
         lines.append(str(sub["index"]))
         lines.append(f"{sub['start']} --> {sub['end']}")
         lines.append(f'<font color="{color}">{text}</font>')
-        lines.append("")  # blank line separator
+        lines.append("")
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
